@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>កម្មវិធីបង្វិលកងចាប់រង្វាន់</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Moul&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Ambient Background Decor -->
+  <div class="bg-decor" aria-hidden="true">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+  </div>
+
+  <!-- Confetti Canvas -->
+  <canvas id="confettiCanvas" class="confetti-canvas" aria-hidden="true"></canvas>
+
+  <!-- ==================== LOGIN SCREEN ==================== -->
+  <section id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-emblem">
+        <div class="emblem-ring">
+          <span class="emblem-icon">🎡</span>
+        </div>
+      </div>
+      <h1 class="login-title" id="loginAppTitle">បង្វិលកងចាប់រង្វាន់</h1>
+      <p class="login-subtitle">សូមបញ្ចូលពាក្យសម្ងាត់ដើម្បីចូលប្រើប្រាស់កម្មវិធី</p>
+
+      <form id="loginForm" class="login-form" autocomplete="off">
+        <div class="input-group">
+          <label for="passwordInput" class="input-label">ពាក្យសម្ងាត់ (Password)</label>
+          <div class="password-wrapper">
+            <input
+              type="password"
+              id="passwordInput"
+              class="form-input password-input"
+              placeholder="បញ្ចូលពាក្យសម្ងាត់..."
+              required
+              autofocus
+            />
+            <button type="button" id="togglePasswordBtn" class="icon-toggle-btn" title="បង្ហាញ/លាក់ពាក្យសម្ងាត់" aria-label="បង្ហាញ ឬលាក់ពាក្យសម្ងាត់">
+              👁️
+            </button>
+          </div>
+        </div>
+
+        <div id="loginError" class="login-error hidden" role="alert"></div>
+
+        <button type="submit" class="btn btn-gold btn-full btn-lg">
+          <span>ចូលប្រើប្រាស់</span>
+          <span class="btn-arrow">→</span>
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ==================== MAIN APPLICATION ==================== -->
+  <div id="appShell" class="app-shell hidden">
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand-logo">🎡</div>
+        <div class="brand-info">
+          <h1 id="headerTitle" class="brand-title">កម្មវិធីបង្វិលកងចាប់រង្វាន់ 2026</h1>
+          <p id="headerSubtitle" class="brand-subtitle">សូមសំណាងល្អទាំងអស់គ្នា!</p>
+        </div>
+      </div>
+
+      <!-- Admin-only navigation mounts dynamically here ONLY when logged in as Admin -->
+      <nav id="adminNavMount" class="header-nav"></nav>
+
+      <div class="header-actions">
+        <span id="roleBadge" class="role-badge"></span>
+        <button type="button" id="soundToggleBtn" class="btn btn-ghost btn-icon" title="បើក/បិទសំឡេង">
+          🔊
+        </button>
+        <button type="button" id="logoutBtn" class="btn btn-outline-danger btn-sm">
+          <span>🚪 ចាកចេញ</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- ===== SPIN WHEEL VIEW ===== -->
+      <section id="wheelView" class="view-section">
+        <div class="wheel-layout">
+          <!-- Left / Center: Wheel Stage -->
+          <div class="wheel-stage-card">
+            <!-- Optional Player Name Input -->
+            <div id="playerInputWrap" class="player-input-wrap hidden">
+              <label for="playerNameInput" class="player-label">👤 ឈ្មោះអ្នកចូលរួម៖</label>
+              <input
+                type="text"
+                id="playerNameInput"
+                class="form-input player-input"
+                placeholder="បញ្ចូលឈ្មោះរបស់អ្នក (ជាជម្រើស)..."
+                maxlength="60"
+              />
+            </div>
+
+            <!-- Wheel Visual Container -->
+            <div class="wheel-container">
+              <!-- Pointer at 12 o'clock -->
+              <div class="wheel-pointer" id="wheelPointer" aria-hidden="true">
+                <svg viewBox="0 0 60 72" width="54" height="64">
+                  <defs>
+                    <linearGradient id="ptrGold" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#fff4b8" />
+                      <stop offset="50%" stop-color="#f5b82e" />
+                      <stop offset="100%" stop-color="#b87408" />
+                    </linearGradient>
+                    <filter id="ptrShadow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#000" flood-opacity="0.55" />
+                    </filter>
+                  </defs>
+                  <path d="M30 68 L6 18 A24 24 0 1 1 54 18 Z" fill="url(#ptrGold)" stroke="#fff7d6" stroke-width="2.5" filter="url(#ptrShadow)" />
+                  <circle cx="30" cy="24" r="8" fill="#8b1e3f" stroke="#fff4b8" stroke-width="2" />
+                </svg>
+              </div>
+
+              <!-- Canvas -->
+              <canvas id="wheelCanvas" width="520" height="520"></canvas>
+
+              <!-- Center Spin Button -->
+              <button type="button" id="centerSpinBtn" class="center-spin-btn" title="ចុចដើម្បីបង្វិល">
+                <span class="center-spin-text">បង្វិល</span>
+              </button>
+            </div>
+
+            <!-- Action Controls under wheel -->
+            <div class="spin-controls">
+              <button type="button" id="mainSpinBtn" class="btn btn-gold btn-xl pulse-glow">
+                <span class="spin-btn-icon">✨</span>
+                <span id="mainSpinBtnText">បង្វិលកងចាប់រង្វាន់</span>
+                <span class="spin-btn-icon">✨</span>
+              </button>
+              <div id="spinStatusNote" class="spin-status-note"></div>
+            </div>
+          </div>
+
+          <!-- Right: Prize Showcase Panel (optional, toggled by Admin setting) -->
+          <aside id="prizeShowcasePanel" class="showcase-card">
+            <div class="showcase-header">
+              <h2 class="showcase-title">🎁 បញ្ជីរង្វាន់សរុប</h2>
+              <span id="showcaseCount" class="badge-pill">0 រង្វាន់</span>
+            </div>
+            <div id="showcaseList" class="showcase-list"></div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ===== ADMIN VIEW MOUNT (COMPLETELY EMPTY FOR USERS) ===== -->
+      <section id="adminViewMount" class="view-section hidden"></section>
+    </main>
+  </div>
+
+  <!-- ==================== WINNER RESULT MODAL ==================== -->
+  <div id="resultModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="modal-card result-modal-card">
+      <div class="result-glow"></div>
+      <div id="resultEmoji" class="result-emoji">🎉</div>
+      <p id="resultBadge" class="result-badge">សូមអបអរសាទរ!</p>
+      <h2 id="resultTitle" class="result-title">ឈ្មោះរង្វាន់</h2>
+      <p id="resultPlayer" class="result-player hidden"></p>
+      <p id="resultDesc" class="result-desc"></p>
+      <button type="button" id="closeResultBtn" class="btn btn-gold btn-lg">
+        យល់ព្រម / បង្វិលបន្ត
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST NOTIFICATION ==================== -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
